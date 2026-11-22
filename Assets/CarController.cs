@@ -5,16 +5,21 @@ public class CarController : MonoBehaviour
 {
     // Speed settings - editable in the Unity Inspector
     public float moveSpeed = 0f;
-    public float turnAngle = 15f;
     public float force = 500f;
     public float topSpeed = 30f;
     public float DragSpeed = 0f;
     public float currentSpeed = 0f;
     private float previousSpeed = 0f;
     public int obstacleHits = 0;
+    Vector2 movement;
+    //Turning
     public float steeringSpeed = 60f;
     public float currentSteeringAngle = 0f;
-    Vector2 movement;
+    public float lowSpeedTurnAngle = 35f;
+    public float highSpeedTurnAngle = 8f;
+    public float steeringReductionSpeed = 25f;
+    
+    //Braking
     public float brakeForce = 3000f;
     public bool isBraking = false;
     private PlayerInput input;
@@ -61,22 +66,20 @@ public class CarController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        UpdateWheelVisuals();
+
+        isBraking = brakeAction.action.IsPressed();
+    }
+
+    void FixedUpdate()
+    {
         MoveVehicle();
         TurnVehicle();
-        UpdateWheelVisuals();
-        if (brakeAction.action.IsPressed())
-        {
-            isBraking = true;
-        }
-        else
-        {
-            isBraking = false;
-        }
     }
 
     void MoveVehicle()
     {
-        //currentSpeed = rb.linearVelocity.magnitude;
+        currentSpeed = rb.linearVelocity.magnitude;
         float verticalInput = movement.y;
         float brakeInput = 1f;
         float motorTorque = 0f;
@@ -161,10 +164,23 @@ public class CarController : MonoBehaviour
     void TurnVehicle()
     {
         float horizontalInput = movement.x;
-        float targetSteeringAngle = horizontalInput * turnAngle;
 
-        currentSteeringAngle = Mathf.MoveTowards(currentSteeringAngle, targetSteeringAngle, steeringSpeed * Time.deltaTime);
+        // Get the car's current speed in meters per second.
+        float speed = rb.linearVelocity.magnitude;
 
+        // Convert speed into a value between 0 and 1.
+        float speedPercent = Mathf.Clamp01(speed / steeringReductionSpeed);
+
+        // Calculate the maximum steering angle based on speed.
+        float adjustedTurnAngle = Mathf.Lerp(lowSpeedTurnAngle, highSpeedTurnAngle, speedPercent);
+
+        // Calculate the target steering angle.
+        float targetSteeringAngle = horizontalInput * adjustedTurnAngle;
+
+        // Gradually move toward the target angle.
+        currentSteeringAngle = Mathf.MoveTowards(currentSteeringAngle, targetSteeringAngle, steeringSpeed * Time.fixedDeltaTime);
+
+        // Apply steering to the front wheels.
         frontLeftWheel.steerAngle = currentSteeringAngle;
         frontRightWheel.steerAngle = currentSteeringAngle;
 
@@ -195,25 +211,7 @@ public class CarController : MonoBehaviour
     }
 
 
-    void OnCollisionEnter(Collision other)
-    {
-        //void means this method does not return any value
-        //onCollisionEnter is a method that is called when this GameObject collides with another GameObject
-        //Collision is a class that contains information about the collision
-        //other is a variable that contains information about the other GameObject that this GameObject collided with
-
-        Debug.Log(other.gameObject.name);
-        if (other.gameObject.CompareTag("Obstacle"))
-        {
-            Debug.Log("Collision with obstacle detected");
-            obstacleHits += 1;
-            Debug.Log("Obstacles Hit: " + obstacleHits);
-            Debug.Log("Collision Time: " + Time.time);
-            //rb.AddForce(-transform.right * 5f, ForceMode.VelocityChange);
-        }
-
-    }
-   
+       
     public void OnMove(InputValue value)
     {
         movement = value.Get<Vector2>();
