@@ -314,7 +314,7 @@ WheelCollider:
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.5
     m_AsymptoteValue: 0.75
-    m_Stiffness: 1.6
+    m_Stiffness: 1.4
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -843,7 +843,7 @@ WheelCollider:
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.5
     m_AsymptoteValue: 0.75
-    m_Stiffness: 1.3
+    m_Stiffness: 1.1
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -1378,7 +1378,7 @@ WheelCollider:
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.5
     m_AsymptoteValue: 0.75
-    m_Stiffness: 1.6
+    m_Stiffness: 1.4
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -2277,7 +2277,7 @@ WheelCollider:
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.5
     m_AsymptoteValue: 0.75
-    m_Stiffness: 1.3
+    m_Stiffness: 1.1
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
