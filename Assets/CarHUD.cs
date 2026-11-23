@@ -18,24 +18,33 @@ public class CarHUD : MonoBehaviour
 
     void Update()
     {
-        // Convert meters per second to MPH.
-        float speedMPH = carRigidbody.linearVelocity.magnitude * 2.23694f;
+        if (car == null || carRigidbody == null)
+            return;
 
-        // Display rounded speed.
-        speedText.text = Mathf.RoundToInt(speedMPH) + " MPH";
+        // Convert the car's speed from m/s to MPH.
+        float speedMPH =
+            carRigidbody.linearVelocity.magnitude * 2.23694f;
 
-        // Fill the speed bar based on topSpeed.
+        // Display current speed in MPH.
+        if (speedText != null)
+        {
+            speedText.text =
+                Mathf.RoundToInt(speedMPH) + " MPH";
+        }
+
+        // Fill the speed bar based on the MPH top speed.
         if (speedBar != null)
         {
             speedBar.fillAmount = Mathf.Clamp01(
-                carRigidbody.linearVelocity.magnitude / car.topSpeed
+                speedMPH / Mathf.Max(car.topSpeed, 0.01f)
             );
         }
 
         // Update obstacle counter.
         if (obstacleText != null)
         {
-            obstacleText.text = "Obstacles Hit: " + car.obstacleHits;
+            obstacleText.text =
+                "Obstacles Hit: " + car.obstacleHits;
         }
 
         // Show brake indicator when braking.

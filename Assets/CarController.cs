@@ -11,6 +11,7 @@ public class CarController : MonoBehaviour
     public float currentSpeed = 0f;
     private float previousSpeed = 0f;
     public int obstacleHits = 0;
+    public float torqueReductionRange = 10f;
     Vector2 movement;
     //Turning
     public float steeringSpeed = 60f;
@@ -80,14 +81,19 @@ public class CarController : MonoBehaviour
 
     void MoveVehicle()
     {
-        currentSpeed = rb.linearVelocity.magnitude;
+        //currentSpeed = rb.linearVelocity.magnitude;
         float verticalInput = movement.y;
         //float brakeInput = 1f;
         float motorTorque = 0f;
 
         //frontLeftWheel.brakeTorque = 0f;
 
+        currentSpeed = rb.linearVelocity.magnitude * 2.23694f;
 
+        float forwardSpeedMPH = Vector3.Dot(
+            rb.linearVelocity,
+            transform.forward
+        ) * 2.23694f;
 
         float brake = 0f;
 
@@ -112,30 +118,43 @@ public class CarController : MonoBehaviour
         rearLeftWheel.brakeTorque = brake;
         rearRightWheel.brakeTorque = brake;
 
-        if (verticalInput != 0f && moveSpeed < topSpeed)
+        // Gradually reduce torque near top speed.
+        float reductionRange = Mathf.Max(
+            torqueReductionRange, 0.01f
+        );
+
+        if (!isBraking)
         {
-            //moveSpeed += Mathf.Abs(verticalInput);
-            //Debug.Log("acceleration activates");
+            if (verticalInput > 0f &&
+                forwardSpeedMPH < topSpeed)
+            {
+                float speedRemaining =
+                    topSpeed - forwardSpeedMPH;
+
+                float torqueMultiplier = Mathf.Clamp01(
+                    speedRemaining / reductionRange
+                );
+
+                motorTorque =
+                    verticalInput * force * torqueMultiplier;
+            }
+            else if (verticalInput < 0f &&
+                     forwardSpeedMPH > -topSpeed)
+            {
+                float speedRemaining =
+                    topSpeed + forwardSpeedMPH;
+
+                float torqueMultiplier = Mathf.Clamp01(
+                    speedRemaining / reductionRange
+                );
+
+                motorTorque =
+                    verticalInput * force * torqueMultiplier;
+            }
         }
-        else if (moveSpeed > 0.3)
-        {
 
 
-
-            //rb.AddForce(-rb.linearVelocity.normalized * moveSpeed * brakeInput, ForceMode.Acceleration);
-
-            //DragSpeed = previousSpeed - currentSpeed;
-
-
-
-            //moveSpeed -= brakeInput;
-            //Debug.Log("drag activates");
-        }
-        if (!isBraking && currentSpeed < topSpeed)
-        {
-            Debug.Log("acceleration activates, vertical:" + verticalInput + " force: " + force);
-            motorTorque = verticalInput * force;
-        }
+        
 
         rearLeftWheel.motorTorque = motorTorque;
         rearRightWheel.motorTorque = motorTorque;

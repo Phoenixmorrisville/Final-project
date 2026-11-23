@@ -60,7 +60,7 @@ public class CarController2 : MonoBehaviour
     {
         float verticalInput = movement.x;
 
-        currentSpeed = rb.linearVelocity.magnitude;
+        //currentSpeed = rb.linearVelocity.magnitude;
 
         // Check whether driven wheels touch the ground.
         bool rearLeftGrounded = rearLeftWheel.isGrounded;
@@ -68,11 +68,27 @@ public class CarController2 : MonoBehaviour
 
         float motorTorque = 0f;
 
-        // Acceleration is applied through rear wheels.
-        if (!isBraking && currentSpeed < topSpeed)
+        currentSpeed = rb.linearVelocity.magnitude * 2.23694f;
+
+        // Speed along the car's forward direction, in MPH.
+        float forwardSpeedMPH = Vector3.Dot(
+            rb.linearVelocity,
+            transform.forward
+        ) * 2.23694f;
+
+        // Apply motor torque only within the speed limits.
+        if (!isBraking)
         {
-            motorTorque = verticalInput * force;
+            if (verticalInput > 0f && forwardSpeedMPH < topSpeed)
+            {
+                motorTorque = verticalInput * force;
+            }
+            else if (verticalInput < 0f && forwardSpeedMPH > -topSpeed)
+            {
+                motorTorque = verticalInput * force;
+            }
         }
+
 
         rearLeftWheel.motorTorque = motorTorque;
         rearRightWheel.motorTorque = motorTorque;
