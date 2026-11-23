@@ -21,6 +21,7 @@ public class CarController : MonoBehaviour
     
     //Braking
     public float brakeForce = 3000f;
+    public float coastBrakeForce = 100f;
     public bool isBraking = false;
     private PlayerInput input;
     public InputActionReference brakeAction;
@@ -56,7 +57,7 @@ public class CarController : MonoBehaviour
         // this GameObject (MyCar) and stores a reference to it in rb.
         rb = GetComponent<Rigidbody>();
 
-        rb.mass = 1200f;
+        //rb.mass = 1200f;
         rb.useGravity = true;
 
         //rb.AddForce(Vector3.right * force, ForceMode.Force);
@@ -81,40 +82,36 @@ public class CarController : MonoBehaviour
     {
         currentSpeed = rb.linearVelocity.magnitude;
         float verticalInput = movement.y;
-        float brakeInput = 1f;
+        //float brakeInput = 1f;
         float motorTorque = 0f;
 
         //frontLeftWheel.brakeTorque = 0f;
 
 
-        if (isBraking == true)
+
+        float brake = 0f;
+
+        if (isBraking)
         {
-
-            //brakeInput += 0.1f;
-            //Debug.Log("shift pressed");
-            //if (moveSpeed > 0f)
-            //{
-               Debug.Log("brake activates");
-            //moveSpeed -= brakeInput;
-
-            //}
-
-            float brake = isBraking ? brakeForce : 0f;
-
-            frontLeftWheel.brakeTorque = brake;
-            frontRightWheel.brakeTorque = brake;
-            rearLeftWheel.brakeTorque = brake;
-            rearRightWheel.brakeTorque = brake;
-
+            // Player is pressing the brake.
+            brake = brakeForce;
+        }
+        else if (Mathf.Abs(verticalInput) < 0.1f)
+        {
+            // Player released the accelerator.
+            brake = coastBrakeForce;
         }
         else
         {
-            //brakeInput = 1f;
-            frontLeftWheel.brakeTorque = 0f;
-            frontRightWheel.brakeTorque = 0f;
-            rearLeftWheel.brakeTorque = 0f;
-            rearRightWheel.brakeTorque = 0f;
+            // Player is accelerating.
+            brake = 0f;
         }
+
+        frontLeftWheel.brakeTorque = brake;
+        frontRightWheel.brakeTorque = brake;
+        rearLeftWheel.brakeTorque = brake;
+        rearRightWheel.brakeTorque = brake;
+
         if (verticalInput != 0f && moveSpeed < topSpeed)
         {
             //moveSpeed += Mathf.Abs(verticalInput);
